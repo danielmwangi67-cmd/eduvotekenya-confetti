@@ -7,52 +7,197 @@
 <style>
   body {
     font-family: 'Poppins', sans-serif;
-    text-align: center;
-    background: linear-gradient(135deg, #f6d365, #fda085);
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
     margin: 0;
+    overflow: hidden;
+    height: 100vh;
+    background: black;
+    position: relative;
+    color: #fff;
+  }
+
+  canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 0;
   }
 
   h1 {
     font-size: 2em;
     color: #fff;
     margin-bottom: 25px;
-    text-shadow: 2px 2px #333;
+    text-shadow: 0 0 10px #fff, 0 0 20px #f0f, 0 0 30px #0ff;
+    position: relative;
+    z-index: 3;
   }
 
   #exitBtn {
-    padding: 14px 40px;
-    font-size: 1.3em;
+    padding: 16px 50px;
+    font-size: 1.4em;
+    font-weight: bold;
     color: #fff;
-    background: linear-gradient(45deg, #6a11cb, #2575fc);
+    background: linear-gradient(45deg, #FFD700, #2575fc);
     border: none;
     border-radius: 50px;
     cursor: pointer;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+    transition: transform 0.3s, box-shadow 0.3s;
+    position: relative;
+    z-index: 3;
   }
 
   #exitBtn:hover {
-    transform: scale(1.05) rotate(-2deg);
-    box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+    transform: scale(1.1) rotate(-2deg);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.6);
   }
 </style>
 </head>
 <body>
 
-<h1>🎉 Thank you for voting! 🎉</h1>
+<canvas id="nebulaCanvas"></canvas>
+<canvas id="bgStars"></canvas>
+
+<h1>🌌 Thank you for voting! 🌌</h1>
 <button id="exitBtn">Return to Dashboard</button>
 
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 <script>
-  const starColors = ['#FFD700','#FF4500','#00FFFF','#FF69B4','#ADFF2F'];
+  const nebulaCanvas = document.getElementById('nebulaCanvas');
+  const nebCtx = nebulaCanvas.getContext('2d');
+  const canvas = document.getElementById('bgStars');
+  const ctx = canvas.getContext('2d');
+  
+  let stars = [], shootingStars = [], nebulaClouds = [];
+  const numStars = 200, numShooting = 2, numNebula = 5;
 
-  // Continuous star confetti for mobile
+  function resizeCanvas() {
+    canvas.width = nebulaCanvas.width = window.innerWidth;
+    canvas.height = nebulaCanvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+
+  // ==== Stars ====
+  function createStars() {
+    stars = [];
+    for (let i = 0; i < numStars; i++) {
+      const size = Math.random() * 2 + 0.5;
+      stars.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        radius: size,
+        color: `hsl(${Math.random()*360}, 80%, 70%)`,
+        dx: (Math.random() - 0.5) * 0.3,
+        dy: (Math.random() - 0.5) * 0.3,
+        alpha: Math.random() * 0.8 + 0.2,
+        dAlpha: Math.random() * 0.02
+      });
+    }
+  }
+
+  // ==== Shooting Stars ====
+  function createShootingStars() {
+    shootingStars = [];
+    for (let i = 0; i < numShooting; i++) {
+      shootingStars.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height/2,
+        length: Math.random() * 100 + 50,
+        speed: Math.random() * 8 + 4,
+        angle: Math.random() * 0.2 - 0.1,
+        color: 'white'
+      });
+    }
+  }
+
+  // ==== Nebula Clouds ====
+  function createNebula() {
+    nebulaClouds = [];
+    for (let i = 0; i < numNebula; i++) {
+      nebulaClouds.push({
+        x: Math.random() * nebulaCanvas.width,
+        y: Math.random() * nebulaCanvas.height,
+        radius: Math.random() * 300 + 200,
+        color: `hsla(${Math.random()*360}, 60%, 50%, 0.15)`,
+        dx: (Math.random()-0.5)*0.2,
+        dy: (Math.random()-0.5)*0.1
+      });
+    }
+  }
+
+  function drawNebula() {
+    nebCtx.clearRect(0,0,nebulaCanvas.width, nebulaCanvas.height);
+    for (let cloud of nebulaClouds) {
+      const gradient = nebCtx.createRadialGradient(cloud.x, cloud.y, 0, cloud.x, cloud.y, cloud.radius);
+      gradient.addColorStop(0, cloud.color);
+      gradient.addColorStop(1, 'rgba(0,0,0,0)');
+      nebCtx.fillStyle = gradient;
+      nebCtx.beginPath();
+      nebCtx.arc(cloud.x, cloud.y, cloud.radius, 0, Math.PI*2);
+      nebCtx.fill();
+
+      cloud.x += cloud.dx;
+      cloud.y += cloud.dy;
+      if (cloud.x < -cloud.radius) cloud.x = nebulaCanvas.width + cloud.radius;
+      if (cloud.x > nebulaCanvas.width + cloud.radius) cloud.x = -cloud.radius;
+      if (cloud.y < -cloud.radius) cloud.y = nebulaCanvas.height + cloud.radius;
+      if (cloud.y > nebulaCanvas.height + cloud.radius) cloud.y = -cloud.radius;
+    }
+    requestAnimationFrame(drawNebula);
+  }
+
+  function drawStars() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    for (let star of stars) {
+      const gradient = ctx.createRadialGradient(star.x, star.y, 0, star.x, star.y, star.radius*3);
+      gradient.addColorStop(0, `rgba(255,255,255,${star.alpha})`);
+      gradient.addColorStop(0.5, star.color);
+      gradient.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = gradient;
+      ctx.beginPath();
+      ctx.arc(star.x, star.y, star.radius, 0, Math.PI*2);
+      ctx.fill();
+
+      star.x += star.dx;
+      star.y += star.dy;
+      star.alpha += star.dAlpha;
+      if (star.alpha <= 0.2 || star.alpha >= 1) star.dAlpha *= -1;
+      if (star.x < 0) star.x = canvas.width;
+      if (star.x > canvas.width) star.x = 0;
+      if (star.y < 0) star.y = canvas.height;
+      if (star.y > canvas.height) star.y = 0;
+    }
+
+    // Shooting stars
+    for (let s of shootingStars) {
+      ctx.beginPath();
+      ctx.moveTo(s.x, s.y);
+      ctx.lineTo(s.x - s.length*s.angle, s.y + s.length);
+      ctx.strokeStyle = s.color;
+      ctx.lineWidth = 2;
+      ctx.shadowBlur = 15;
+      ctx.shadowColor = 'white';
+      ctx.stroke();
+
+      s.x += s.speed;
+      s.y += s.speed*s.angle;
+      if (s.x > canvas.width || s.y > canvas.height/2) {
+        s.x = Math.random() * canvas.width;
+        s.y = Math.random() * canvas.height/2;
+      }
+    }
+
+    requestAnimationFrame(drawStars);
+  }
+
+  createStars();
+  createShootingStars();
+  createNebula();
+  drawNebula();
+  drawStars();
+
+  // ==== Confetti ====
+  const starColors = ['#FFD700','#FF4500','#00FFFF','#FF69B4','#ADFF2F'];
   function mobileStarConfetti() {
     confetti({
       particleCount: 2,
@@ -71,11 +216,11 @@
   mobileStarConfetti();
 
   function redirectToDashboard() {
-    window.location.href = "https://www.eduvotekenya.co.ke/home"; // Replace with your dashboard link
+    window.location.href = "https://eduvotekenya.com/dashboard"; // Replace with your dashboard link
   }
 
-  // Auto-redirect after 6 seconds
-  setTimeout(redirectToDashboard, 6000);
+  // ==== Auto redirect after 15 seconds ====
+  setTimeout(redirectToDashboard, 15000);
 
   const button = document.getElementById('exitBtn');
   button.addEventListener('click', () => {
