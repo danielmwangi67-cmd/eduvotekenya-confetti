@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Thank You for Voting!</title>
+<style>
+  body {
+    font-family: 'Poppins', sans-serif;
+    text-align: center;
+    background: linear-gradient(135deg, #f6d365, #fda085);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    margin: 0;
+  }
+
+  h1 {
+    font-size: 2em;
+    color: #fff;
+    margin-bottom: 25px;
+    text-shadow: 2px 2px #333;
+  }
+
+  #exitBtn {
+    padding: 14px 40px;
+    font-size: 1.3em;
+    color: #fff;
+    background: linear-gradient(45deg, #6a11cb, #2575fc);
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  #exitBtn:hover {
+    transform: scale(1.05) rotate(-2deg);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+  }
+</style>
+</head>
+<body>
+
+<h1>🎉 Thank you for voting! 🎉</h1>
+<button id="exitBtn">Return to Dashboard</button>
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<script>
+  const starColors = ['#FFD700','#FF4500','#00FFFF','#FF69B4','#ADFF2F'];
+
+  // Continuous star confetti for mobile
+  function mobileStarConfetti() {
+    confetti({
+      particleCount: 2,
+      angle: Math.random() * 60 + 60,
+      spread: 50,
+      origin: { x: Math.random(), y: 0 },
+      shapes: ['star'],
+      colors: [starColors[Math.floor(Math.random() * starColors.length)]],
+      scalar: Math.random() * 0.6 + 0.5,
+      gravity: 0.4,
+      drift: (Math.random() - 0.5) * 1.5,
+      ticks: 180
+    });
+    requestAnimationFrame(mobileStarConfetti);
+  }
+  mobileStarConfetti();
+
+  function redirectToDashboard() {
+    window.location.href = "https://www.eduvotekenya.co.ke/home"; // Replace with your dashboard link
+  }
+
+  // Auto-redirect after 6 seconds
+  setTimeout(redirectToDashboard, 6000);
+
+  const button = document.getElementById('exitBtn');
+  button.addEventListener('click', () => {
+    confetti({
+      particleCount: 250,
+      spread: 140,
+      origin: { y: 0.6 },
+      shapes: ['star'],
+      colors: starColors,
+      scalar: 1
+    });
+    setTimeout(redirectToDashboard, 500);
+  });
+</script>
+
+</body>
+</html>
